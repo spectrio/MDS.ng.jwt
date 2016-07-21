@@ -3,6 +3,7 @@
   "version": "0.0.9",
   "description": "Library to help you work with JWTs on AngularJS",
   "main": "index.js",
+  "license": "MIT",
   "author": {
     "name": "Martin Gontovnikas",
     "email": "martin@gon.to"

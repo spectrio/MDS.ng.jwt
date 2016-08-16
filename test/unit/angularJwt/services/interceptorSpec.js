@@ -4,6 +4,7 @@ describe('interceptor', function() {
 
   beforeEach(function() {
     module('angular-jwt.interceptor');
+    module('angular-jwt.options');
   });
 
   afterEach(inject(function($httpBackend) {
@@ -13,7 +14,7 @@ describe('interceptor', function() {
 
 
   it('should intercept requests when added to $httpProvider.interceptors and set token', function (done) {
-    module( function ($httpProvider, jwtInterceptorProvider) {
+    module( function ($httpProvider, jwtInterceptorProvider, jwtOptionsProvider) {
       jwtInterceptorProvider.tokenGetter = function() {
         return 123;
       }
@@ -35,7 +36,7 @@ describe('interceptor', function() {
   });
 
   it('should not add Authr headers to Cross Origin requests unless whitelisted', function (done) {
-    module( function ($httpProvider, jwtInterceptorProvider) {
+    module( function ($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
       jwtInterceptorProvider.whiteListedDomains = ['whitelisted.Example.com']
       jwtInterceptorProvider.tokenGetter = function() {
         return 123;
@@ -67,7 +68,7 @@ describe('interceptor', function() {
   })
 
   it('should work with promises', function (done) {
-    module( function ($httpProvider, jwtInterceptorProvider) {
+    module( function ($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
       jwtInterceptorProvider.tokenGetter = function($q) {
         return $q.when(345);
       }
@@ -108,7 +109,7 @@ describe('interceptor', function() {
   });
 
   it('should add the token to the url params when the configuration option is set', function (done) {
-    module( function ($httpProvider, jwtInterceptorProvider) {
+    module( function ($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
       jwtInterceptorProvider.urlParam = 'access_token';
       jwtInterceptorProvider.tokenGetter = function() {
         return 123;

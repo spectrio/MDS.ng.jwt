@@ -1,36 +1,27 @@
 angular.module('angular-jwt.authManager', [])
   .provider('authManager', function() {
 
-    this.authenticated = false;
-    this.loginPath = '/';
-    this.tokenGetter = function() {
-      return null;
-    }
-    this.unauthenticatedRedirector = function(location) {
-      location.path(this.loginPath);
-    }
+    this.$get = function($rootScope, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
-    var config = this;
+      var config = jwtOptions.getConfig();
 
-    this.$get = function($rootScope, $location, jwtHelper, jwtInterceptor) {
+      $rootScope.isAuthenticated = false;
 
-      var authenticated = false;
+      function authenticate() {
+        $rootScope.isAuthenticated = true;
+      }
 
-      function isAuthenticated() {
-        return authenticated;
+      function unauthenticate() {
+        $rootScope.isAuthenticated = false;
       }
 
       function checkAuthOnRefresh() {
-        var routerEvent = '$locationChangeStart';
-        $rootScope.$on(routerEvent, function() {
+        $rootScope.$on('$locationChangeStart', function() {
           var token = config.tokenGetter();
           if (token) {
             if (!jwtHelper.isTokenExpired(token)) {
-              authenticated = true;
+              authenticate();
             }
-          } else {
-            authenticated = false;
-            config.unauthenticatedRedirector($location);
           }
         });
       }
@@ -38,11 +29,13 @@ angular.module('angular-jwt.authManager', [])
       function redirectWhenUnauthenticated() {
         $rootScope.$on('unauthenticated', function() {
           config.unauthenticatedRedirector($location);
+          unauthenticate();
         });
       }
 
       return {
-        isAuthenticated: isAuthenticated,
+        authenticate: authenticate,
+        unauthenticate: unauthenticate,
         checkAuthOnRefresh: checkAuthOnRefresh,
         redirectWhenUnauthenticated: redirectWhenUnauthenticated
       }

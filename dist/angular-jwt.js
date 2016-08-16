@@ -8,6 +8,7 @@
 // Modules
 angular.module('angular-jwt',
     [
+        'angular-jwt.options',
         'angular-jwt.interceptor',
         'angular-jwt.jwt',
         'angular-jwt.authManager'
@@ -16,36 +17,27 @@ angular.module('angular-jwt',
 angular.module('angular-jwt.authManager', [])
   .provider('authManager', function() {
 
-    this.authenticated = false;
-    this.loginPath = '/';
-    this.tokenGetter = function() {
-      return null;
-    }
-    this.unauthenticatedRedirector = function(location) {
-      location.path(this.loginPath);
-    }
+    this.$get = ["$rootScope", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function($rootScope, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
-    var config = this;
+      var config = jwtOptions.getConfig();
 
-    this.$get = ["$rootScope", "$location", "jwtHelper", "jwtInterceptor", function($rootScope, $location, jwtHelper, jwtInterceptor) {
+      $rootScope.isAuthenticated = false;
 
-      var authenticated = false;
+      function authenticate() {
+        $rootScope.isAuthenticated = true;
+      }
 
-      function isAuthenticated() {
-        return authenticated;
+      function unauthenticate() {
+        $rootScope.isAuthenticated = false;
       }
 
       function checkAuthOnRefresh() {
-        var routerEvent = '$locationChangeStart';
-        $rootScope.$on(routerEvent, function() {
+        $rootScope.$on('$locationChangeStart', function() {
           var token = config.tokenGetter();
           if (token) {
             if (!jwtHelper.isTokenExpired(token)) {
-              authenticated = true;
+              authenticate();
             }
-          } else {
-            authenticated = false;
-            config.unauthenticatedRedirector($location);
           }
         });
       }
@@ -53,36 +45,40 @@ angular.module('angular-jwt.authManager', [])
       function redirectWhenUnauthenticated() {
         $rootScope.$on('unauthenticated', function() {
           config.unauthenticatedRedirector($location);
+          unauthenticate();
         });
       }
 
       return {
-        isAuthenticated: isAuthenticated,
+        authenticate: authenticate,
+        unauthenticate: unauthenticate,
         checkAuthOnRefresh: checkAuthOnRefresh,
         redirectWhenUnauthenticated: redirectWhenUnauthenticated
       }
     }]
   });
- angular.module('angular-jwt.interceptor', [])
+angular.module('angular-jwt.interceptor', [])
   .provider('jwtInterceptor', function() {
 
-    this.urlParam = null;
-    this.authHeader = 'Authorization';
-    this.authPrefix = 'Bearer ';
-    this.whiteListedDomains = [];
-    this.tokenGetter = function() {
-      return null;
-    };
+    this.urlParam;
+    this.authHeader;
+    this.authPrefix;
+    this.whiteListedDomains;
+    this.tokenGetter;
 
     var config = this;
 
+    this.$get = ["$q", "$injector", "$rootScope", "urlUtils", "jwtOptions", function($q, $injector, $rootScope, urlUtils, jwtOptions) {
 
-    this.$get = ["$q", "$injector", "$rootScope", "urlUtils", function ($q, $injector, $rootScope, urlUtils) {
+      var options = angular.extend({}, jwtOptions.getConfig(), config);
 
       function isSafe (url) {
+        if (!urlUtils.isSameOrigin(url) && !options.whiteListedDomains.length) {
+          throw new Error('As of v0.1.0, requests to domains other than the application\'s origin must be white listed. Use jwtOptionsProvider.config({ whiteListedDomains: [<domain>] }); to whitelist.')
+        }
         var hostname = urlUtils.urlResolve(url).hostname.toLowerCase();
-        for (var i = 0; i < config.whiteListedDomains.length; i++) {
-          var domain = config.whiteListedDomains[i].toLowerCase();
+        for (var i = 0; i < options.whiteListedDomains.length; i++) {
+          var domain = options.whiteListedDomains[i].toLowerCase();
           if (domain === hostname) {
             return true;
           }
@@ -101,30 +97,30 @@ angular.module('angular-jwt.authManager', [])
             return request;
           }
 
-          if (config.urlParam) {
+          if (options.urlParam) {
             request.params = request.params || {};
             // Already has the token in the url itself
-            if (request.params[config.urlParam]) {
+            if (request.params[options.urlParam]) {
               return request;
             }
           } else {
             request.headers = request.headers || {};
             // Already has an Authorization header
-            if (request.headers[config.authHeader]) {
+            if (request.headers[options.authHeader]) {
               return request;
             }
           }
 
-          var tokenPromise = $q.when($injector.invoke(config.tokenGetter, this, {
-            config: request
+          var tokenPromise = $q.when($injector.invoke(options.tokenGetter, this, {
+            options: request
           }));
 
           return tokenPromise.then(function(token) {
             if (token) {
-              if (config.urlParam) {
-                request.params[config.urlParam] = token;
+              if (options.urlParam) {
+                request.params[options.urlParam] = token;
               } else {
-                request.headers[config.authHeader] = config.authPrefix + token;
+                request.headers[options.authHeader] = options.authPrefix + token;
               }
             }
             return request;
@@ -138,9 +134,8 @@ angular.module('angular-jwt.authManager', [])
           return $q.reject(response);
         }
       };
-    }];
+    }]
   });
-
  angular.module('angular-jwt.jwt', [])
   .service('jwtHelper', ["$window", function($window) {
 
@@ -198,6 +193,40 @@ angular.module('angular-jwt.authManager', [])
     };
   }]);
 
+angular.module('angular-jwt.options', [])
+  .provider('jwtOptions', function() {
+    var globalConfig = {};
+    this.config = function(value) {
+      globalConfig = value;
+    }
+    this.$get = function() {
+
+      var options = {
+        urlParam: null,
+        authHeader: 'Authorization',
+        authPrefix: 'Bearer ',
+        whiteListedDomains: [],
+        tokenGetter: function() {
+          return null;
+        },
+        loginPath: '/',
+        unauthenticatedRedirectPath: '/',
+        unauthenticatedRedirector: function(location) {
+          location.path(this.unauthenticatedRedirectPath);
+        }
+      }
+
+      function JwtOptions() {
+        var config = this.config = angular.extend({}, options, globalConfig);
+      }
+
+      JwtOptions.prototype.getConfig = function() {
+        return this.config;
+      }
+      
+      return new JwtOptions();
+    }
+  });
  /**
   * The content from this file was directly lifted from Angular. It is
   * unfortunately not a public API, so the best we can do is copy it.

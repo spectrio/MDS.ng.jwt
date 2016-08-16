@@ -5,6 +5,8 @@
 // Modules
 angular.module('angular-jwt',
     [
+        'angular-jwt.options',
         'angular-jwt.interceptor',
-        'angular-jwt.jwt'
+        'angular-jwt.jwt',
+        'angular-jwt.authManager'
     ]);

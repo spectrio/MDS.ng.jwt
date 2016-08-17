@@ -115,7 +115,7 @@ angular
     // This request will NOT send the token as it has skipAuthentication
     $http({
       url: '/hola',
-      skipAuthorization: true
+      skipAuthorization: true,
       method: 'GET'
     });
   });
@@ -185,7 +185,7 @@ angular
     // This request will send the auth0.id_token since URL matches
     $http({
       url: 'http://auth0.com/hola',
-      skipAuthorization: true
+      skipAuthorization: true,
       method: 'GET'
     });
   }

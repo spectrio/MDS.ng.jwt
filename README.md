@@ -74,7 +74,7 @@ JWT interceptor will take care of sending the JWT in every request.
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     // Please note we're annotating the function so that the $injector works when the file is minified
     jwtOptionsProvider.config({
       tokenGetter: ['myService', function(myService) {
@@ -100,7 +100,7 @@ angular
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     // Please note we're annotating the function so that the $injector works when the file is minified
     jwtOptionsProvider.config({
       tokenGetter: ['myService', function(myService) {
@@ -128,7 +128,7 @@ If you are calling an API that is on a domain other than your application's orig
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
 
       ...
@@ -148,7 +148,7 @@ should adapt your `tokenGetter` method to fit your needs. For example:
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
       tokenGetter: ['options', function(options) {
         // Skip authentication for any requests ending in .html
@@ -169,7 +169,7 @@ angular
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
       tokenGetter: ['options', function(options) {
         if (options.url.indexOf('http://auth0.com') === 0) {
@@ -262,7 +262,7 @@ angular
 
 ```js
 angular.module('app', ['angular-jwt'])
-.config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+.config(function Config($httpProvider, jwtOptionsProvider) {
   jwtOptionsProvider.config({
     urlParam: 'access_token',
     tokenGetter: ['myService', function(myService) {

@@ -74,7 +74,7 @@ JWT interceptor will take care of sending the JWT in every request.
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     // Please note we're annotating the function so that the $injector works when the file is minified
     jwtOptionsProvider.config({
       tokenGetter: ['myService', function(myService) {
@@ -82,7 +82,7 @@ angular
         return localStorage.getItem('id_token');
       }];
     });
-    
+
     $httpProvider.interceptors.push('jwtInterceptor');
   })
   .controller('Controller', function Controller($http) {
@@ -100,7 +100,7 @@ angular
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     // Please note we're annotating the function so that the $injector works when the file is minified
     jwtOptionsProvider.config({
       tokenGetter: ['myService', function(myService) {
@@ -108,7 +108,7 @@ angular
         return localStorage.getItem('id_token');
       }];
     });
-    
+
     $httpProvider.interceptors.push('jwtInterceptor');
   })
   .controller('Controller', function Controller($http) {
@@ -128,7 +128,7 @@ If you are calling an API that is on a domain other than your application's orig
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
 
       ...
@@ -139,27 +139,27 @@ angular
 
 ### Not Sending the JWT for Template Requests
 
-The `tokenGetter` method can have a parameter `config` injected by angular-jwt. This parameter is the configuration object of the current request.
+The `tokenGetter` method can have a parameter `options` injected by angular-jwt. This parameter is the options object of the current request.
 
-By default the interceptor will send the JWT for all HTTP requests. This includes any `ng-include` directives or 
+By default the interceptor will send the JWT for all HTTP requests. This includes any `ng-include` directives or
 `templateUrls` defined in a `state` in the `stateProvider`. If you want to avoid sending the JWT for these requests you
 should adapt your `tokenGetter` method to fit your needs. For example:
 
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
-      tokenGetter: ['config', function(config) {
+      tokenGetter: ['options', function(options) {
         // Skip authentication for any requests ending in .html
-        if (config.url.substr(config.url.length - 5) == '.html') {
+        if (options.url.substr(options.url.length - 5) == '.html') {
           return null;
         }
-        
+
         return localStorage.getItem('id_token');
       }]
     });
-    
+
     $httpProvider.interceptors.push('jwtInterceptor');
   });
 ```
@@ -169,10 +169,10 @@ angular
 ```js
 angular
   .module('app', ['angular-jwt'])
-  .config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+  .config(function Config($httpProvider, jwtOptionsProvider) {
     jwtOptionsProvider.config({
-      tokenGetter: ['config', function(config) {
-        if (config.url.indexOf('http://auth0.com') === 0) {
+      tokenGetter: ['options', function(options) {
+        if (options.url.indexOf('http://auth0.com') === 0) {
           return localStorage.getItem('auth0.id_token');
         } else {
           return localStorage.getItem('id_token');
@@ -208,7 +208,7 @@ The authentication state that is set after login will only be good as long as th
 angular
   .module('app')
   .run(function(authManager) {
-  
+
     authManager.checkAuthOnRefresh();
 
   });
@@ -222,7 +222,7 @@ When the user's JWT expires and they attempt a call to a secured endpoint, a 401
 angular
   .module('app')
   .run(function(authManager) {
-    
+
     ...
 
     authManager.redirectWhenUnauthenticated();
@@ -262,7 +262,7 @@ angular
 
 ```js
 angular.module('app', ['angular-jwt'])
-.config(function Config($httpProvider, jwtOptionsProvider, jwtInterceptorProvider) {
+.config(function Config($httpProvider, jwtOptionsProvider) {
   jwtOptionsProvider.config({
     urlParam: 'access_token',
     tokenGetter: ['myService', function(myService) {
@@ -270,7 +270,7 @@ angular.module('app', ['angular-jwt'])
       return localStorage.getItem('id_token');
     }]
   });
-  
+
   $httpProvider.interceptors.push('jwtInterceptor');
 })
 .controller('Controller', function Controller($http) {
@@ -291,7 +291,7 @@ You can see some more examples of how this works in [the tests](https://github.c
 
 ### I have minification problems with angular-jwt in production. What's going on?
 
-When you're using the `tokenGetter` function, it's then called with the injector. `ngAnnotate` doesn't automatically detect that this function receives services as parameters, therefore you must either annotate this method for `ngAnnotate` to know, or use it like follows: 
+When you're using the `tokenGetter` function, it's then called with the injector. `ngAnnotate` doesn't automatically detect that this function receives services as parameters, therefore you must either annotate this method for `ngAnnotate` to know, or use it like follows:
 
 ```js
 jwtOptionsProvider({
@@ -336,6 +336,3 @@ Auth0 helps you to:
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
-
-
-

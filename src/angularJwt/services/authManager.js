@@ -28,8 +28,15 @@ angular.module('angular-jwt.authManager', [])
       
       function redirectWhenUnauthenticated() {
         $rootScope.$on('unauthenticated', function() {
-          config.unauthenticatedRedirector($location);
-          unauthenticate();
+          var redirector = config.unauthenticatedRedirector;
+          var redirectFn;
+          if(Array.isArray(redirector)) {
+            redirectFn = redirector[redirector.length - 1];
+            redirectFn($location);
+            unauthenticate();
+          } else {
+            redirector($location);
+          }
         });
       }
 

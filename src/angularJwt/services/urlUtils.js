@@ -107,4 +107,4 @@
       isSameOrigin: urlIsSameOrigin
     };
 
-  })
+  });

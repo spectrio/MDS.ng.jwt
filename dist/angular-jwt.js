@@ -15,9 +15,9 @@ angular.module('angular-jwt',
     ]);
 
 angular.module('angular-jwt.authManager', [])
-  .provider('authManager', function() {
+  .provider('authManager', function () {
 
-    this.$get = ["$rootScope", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function($rootScope, $location, jwtHelper, jwtInterceptor, jwtOptions) {
+    this.$get = ["$rootScope", "$injector", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
       var config = jwtOptions.getConfig();
 
@@ -32,8 +32,14 @@ angular.module('angular-jwt.authManager', [])
       }
 
       function checkAuthOnRefresh() {
-        $rootScope.$on('$locationChangeStart', function() {
-          var token = config.tokenGetter();
+        $rootScope.$on('$locationChangeStart', function () {
+          var tokenGetter = config.tokenGetter;
+          var token = null;
+          if (Array.isArray(tokenGetter)) {
+            token = $injector.invoke(tokenGetter, this, {});
+          } else {
+            token = config.tokenGetter();
+          }
           if (token) {
             if (!jwtHelper.isTokenExpired(token)) {
               authenticate();
@@ -41,18 +47,16 @@ angular.module('angular-jwt.authManager', [])
           }
         });
       }
-      
+
       function redirectWhenUnauthenticated() {
-        $rootScope.$on('unauthenticated', function() {
+        $rootScope.$on('unauthenticated', function () {
           var redirector = config.unauthenticatedRedirector;
-          var redirectFn;
-          if(Array.isArray(redirector)) {
-            redirectFn = redirector[redirector.length - 1];
-            redirectFn($location);
-            unauthenticate();
+          if (Array.isArray(redirector)) {
+            $injector.invoke(redirector, this, {});
           } else {
-            redirector($location);
+            config.unauthenticatedRedirector($location);
           }
+          unauthenticate();
         });
       }
 
@@ -64,6 +68,7 @@ angular.module('angular-jwt.authManager', [])
       }
     }]
   });
+
 angular.module('angular-jwt.interceptor', [])
   .provider('jwtInterceptor', function() {
 
@@ -157,7 +162,7 @@ angular.module('angular-jwt.interceptor', [])
         }
       }
       return $window.decodeURIComponent(escape($window.atob(output))); //polyfill https://github.com/davidchambers/Base64.js
-    }
+    };
 
 
     this.decodeToken = function(token) {
@@ -173,7 +178,7 @@ angular.module('angular-jwt.interceptor', [])
       }
 
       return angular.fromJson(decoded);
-    }
+    };
 
     this.getTokenExpirationDate = function(token) {
       var decoded = this.decodeToken(token);
@@ -205,7 +210,7 @@ angular.module('angular-jwt.options', [])
     var globalConfig = {};
     this.config = function(value) {
       globalConfig = value;
-    }
+    };
     this.$get = function() {
 
       var options = {
@@ -221,7 +226,7 @@ angular.module('angular-jwt.options', [])
         unauthenticatedRedirector: function(location) {
           location.path(this.unauthenticatedRedirectPath);
         }
-      }
+      };
 
       function JwtOptions() {
         var config = this.config = angular.extend({}, options, globalConfig);
@@ -229,11 +234,12 @@ angular.module('angular-jwt.options', [])
 
       JwtOptions.prototype.getConfig = function() {
         return this.config;
-      }
-      
+      };
+
       return new JwtOptions();
     }
   });
+
  /**
   * The content from this file was directly lifted from Angular. It is
   * unfortunately not a public API, so the best we can do is copy it.
@@ -343,6 +349,6 @@ angular.module('angular-jwt.options', [])
       isSameOrigin: urlIsSameOrigin
     };
 
-  })
+  });
 
 }());

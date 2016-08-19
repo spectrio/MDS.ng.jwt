@@ -3,7 +3,7 @@ angular.module('angular-jwt.options', [])
     var globalConfig = {};
     this.config = function(value) {
       globalConfig = value;
-    }
+    };
     this.$get = function() {
 
       var options = {
@@ -19,7 +19,7 @@ angular.module('angular-jwt.options', [])
         unauthenticatedRedirector: function(location) {
           location.path(this.unauthenticatedRedirectPath);
         }
-      }
+      };
 
       function JwtOptions() {
         var config = this.config = angular.extend({}, options, globalConfig);
@@ -27,8 +27,8 @@ angular.module('angular-jwt.options', [])
 
       JwtOptions.prototype.getConfig = function() {
         return this.config;
-      }
-      
+      };
+
       return new JwtOptions();
     }
   });

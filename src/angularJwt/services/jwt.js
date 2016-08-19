@@ -12,7 +12,7 @@
         }
       }
       return $window.decodeURIComponent(escape($window.atob(output))); //polyfill https://github.com/davidchambers/Base64.js
-    }
+    };
 
 
     this.decodeToken = function(token) {
@@ -28,7 +28,7 @@
       }
 
       return angular.fromJson(decoded);
-    }
+    };
 
     this.getTokenExpirationDate = function(token) {
       var decoded = this.decodeToken(token);

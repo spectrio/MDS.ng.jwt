@@ -17,7 +17,7 @@ angular.module('angular-jwt',
 angular.module('angular-jwt.authManager', [])
   .provider('authManager', function () {
 
-    this.$get = ["$rootScope", "$injector", "$q", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function ($rootScope, $injector, $q, $location, jwtHelper, jwtInterceptor, jwtOptions) {
+    this.$get = ["$rootScope", "$injector", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
       var config = jwtOptions.getConfig();
 

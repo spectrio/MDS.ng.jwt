@@ -80,7 +80,7 @@ angular
       tokenGetter: ['myService', function(myService) {
         myService.doSomething();
         return localStorage.getItem('id_token');
-      }];
+      }]
     });
 
     $httpProvider.interceptors.push('jwtInterceptor');
@@ -106,7 +106,7 @@ angular
       tokenGetter: ['myService', function(myService) {
         myService.doSomething();
         return localStorage.getItem('id_token');
-      }];
+      }]
     });
 
     $httpProvider.interceptors.push('jwtInterceptor');
@@ -297,7 +297,7 @@ When you're using the `tokenGetter` function, it's then called with the injector
 jwtOptionsProvider({
   tokenGetter: ['store', '$http', function(store, $http) {
     ...
-  }];
+  }]
 });
 ```
 

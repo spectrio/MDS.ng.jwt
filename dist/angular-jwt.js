@@ -36,7 +36,7 @@ angular.module('angular-jwt.authManager', [])
           var tokenGetter = config.tokenGetter;
           var token = null;
           if (Array.isArray(tokenGetter)) {
-            token = $injector.invoke(tokenGetter, this, {});
+            token = $injector.invoke(tokenGetter, this, {options: null});
           } else {
             token = config.tokenGetter();
           }

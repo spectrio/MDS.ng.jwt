@@ -12,7 +12,7 @@ This library will help you work with [JWTs](http://jwt.io/).
 
 ## Installing it
 
-You have several options:
+You have several options: Install with either bower or npm and link to the installed file from html using script tag.
 
 ```bash
 bower install angular-jwt
@@ -20,10 +20,6 @@ bower install angular-jwt
 
 ```bash
 npm install angular-jwt
-```
-
-```html
-<script type="text/javascript" src="https://cdn.rawgit.com/auth0/angular-jwt/master/dist/angular-jwt.js"></script>
 ```
 
 ## jwtHelper

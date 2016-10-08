@@ -210,16 +210,18 @@ angular
   });
 ```
 
-**Note: If your `tokenGetter` relies on request `options`.** Be mindful that `checkAuthOnRefresh()` will pass `null` as `options` since the call happens in the run phase of the angular lifecycle and no requests are fired through the angular app. So you need to check if `options` isn't null in your `tokenGetter`:
+**Note:** If your `tokenGetter` relies on request `options`, be mindful that `checkAuthOnRefresh()` will pass `null` as `options` since the call happens in the run phase of the Angular lifecycle and no requests are fired through the Angular app. If you are using requestion `options`, check that `options` isn't `null` in your `tokenGetter` function:
 
 ```js
 ...
+
 tokenGetter: ['options', function (options) {
   if (options && options.url.substr(options.url.length - 5) == '.html') {
     return null;
   }
   return localStorage.getItem('id_token');
 }],
+
 ...
 ```
 

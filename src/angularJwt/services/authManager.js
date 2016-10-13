@@ -5,6 +5,16 @@ angular.module('angular-jwt.authManager', [])
 
       var config = jwtOptions.getConfig();
 
+      function invokeToken(tokenGetter) {
+        var token = null;
+        if (Array.isArray(tokenGetter)) {
+          token = $injector.invoke(tokenGetter, this, {options: null});
+        } else {
+          token = tokenGetter();
+        }
+        return token;
+      }      
+
       $rootScope.isAuthenticated = false;
 
       function authenticate() {
@@ -17,13 +27,7 @@ angular.module('angular-jwt.authManager', [])
 
       function checkAuthOnRefresh() {
         $rootScope.$on('$locationChangeStart', function () {
-          var tokenGetter = config.tokenGetter;
-          var token = null;
-          if (Array.isArray(tokenGetter)) {
-            token = $injector.invoke(tokenGetter, this, {options: null});
-          } else {
-            token = config.tokenGetter();
-          }
+          var token = invokeToken(config.tokenGetter);
           if (token) {
             if (!jwtHelper.isTokenExpired(token)) {
               authenticate();
@@ -54,8 +58,8 @@ angular.module('angular-jwt.authManager', [])
         var routeData = (next.$$route) ? next.$$route : next.data;
 
         if (routeData && routeData.requiresLogin === true) {
-          var token = config.tokenGetter();
-          if (!token || jwtHelper.isTokenExpired(config.tokenGetter())) {
+          var token = invokeToken(config.tokenGetter);
+          if (!token || jwtHelper.isTokenExpired(token)) {
             config.unauthenticatedRedirector($location);
             event.preventDefault();
           }

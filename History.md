@@ -1,3 +1,9 @@
+0.1.6 / 2016-10-13
+==================
+
+  * Add support for `requiresLogin` to be set in route configuration to protect client-side routes
+  * Add event `tokenHasExpired` to allow for custom behavior when a token is expired on page refresh
+
 0.1.0 / 2016-08-15
 ==================
 

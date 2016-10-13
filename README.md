@@ -131,6 +131,7 @@ angular
 
       whiteListedDomains: ['api.myapp.com', 'localhost']
     });
+  });
 ```
 
 Note that you only need to provide the domain. Protocols (ex: `http://`) and port numbers should be omitted. 
@@ -186,7 +187,7 @@ angular
       skipAuthorization: true,
       method: 'GET'
     });
-  }
+  });
 ```
 
 ## Managing Authentication state with `authManager`
@@ -290,6 +291,7 @@ angular
     jwtOptionsProvider.config({
       unauthenticatedRedirectPath: '/login'
     });
+  });
 ```
 
 ### Configuring the Unauthenticated Redirector
@@ -305,6 +307,7 @@ angular
         $state.go('app.login');
       }]
     });
+  });
 ```
 
 ### Sending the token as a URL Param

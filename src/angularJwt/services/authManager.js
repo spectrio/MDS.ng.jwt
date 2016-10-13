@@ -27,6 +27,8 @@ angular.module('angular-jwt.authManager', [])
           if (token) {
             if (!jwtHelper.isTokenExpired(token)) {
               authenticate();
+            } else {
+              $rootScope.$broadcast('tokenHasExpired', token);
             }
           }
         });

@@ -13,7 +13,15 @@ angular.module('angular-jwt.authManager', [])
           token = tokenGetter();
         }
         return token;
-      }      
+      }
+
+      function invokeRedirector(redirector) {
+        if (Array.isArray(redirector)) {
+          return $injector.invoke(redirector, this, {});
+        } else {
+          return redirector($location);
+        }
+      }
 
       $rootScope.isAuthenticated = false;
 
@@ -40,16 +48,11 @@ angular.module('angular-jwt.authManager', [])
 
       function redirectWhenUnauthenticated() {
         $rootScope.$on('unauthenticated', function () {
-          var redirector = config.unauthenticatedRedirector;
-          if (Array.isArray(redirector)) {
-            $injector.invoke(redirector, this, {});
-          } else {
-            config.unauthenticatedRedirector($location);
-          }
+          invokeRedirector(config.unauthenticatedRedirector);
           unauthenticate();
         });
       }
-      
+
       function verifyRoute(event, next) {
         if (!next) {
           return false;
@@ -60,7 +63,7 @@ angular.module('angular-jwt.authManager', [])
         if (routeData && routeData.requiresLogin === true) {
           var token = invokeToken(config.tokenGetter);
           if (!token || jwtHelper.isTokenExpired(token)) {
-            config.unauthenticatedRedirector($location);
+            invokeRedirector(config.unauthenticatedRedirector);
             event.preventDefault();
           }
         }
@@ -72,6 +75,8 @@ angular.module('angular-jwt.authManager', [])
       return {
         authenticate: authenticate,
         unauthenticate: unauthenticate,
+        getToken: function(){ return invokeToken(config.tokenGetter); },
+        redirect: function() { return invokeRedirector(config.unauthenticatedRedirector); },
         checkAuthOnRefresh: checkAuthOnRefresh,
         redirectWhenUnauthenticated: redirectWhenUnauthenticated
       }

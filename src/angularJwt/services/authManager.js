@@ -1,7 +1,7 @@
 angular.module('angular-jwt.authManager', [])
   .provider('authManager', function () {
 
-    this.$get = ["$rootScope", "$injector", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions) {
+    this.$get = function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
       var config = jwtOptions.getConfig();
 
@@ -80,5 +80,5 @@ angular.module('angular-jwt.authManager', [])
         checkAuthOnRefresh: checkAuthOnRefresh,
         redirectWhenUnauthenticated: redirectWhenUnauthenticated
       }
-    }]
+    }
   });

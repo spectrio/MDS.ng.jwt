@@ -1,3 +1,10 @@
+0.1.7 / 2016-10-21
+==================
+
+  * Add `invokeRedirector` method to `authManager` to properly handle annotated `unauthenticatedRedirector` functions
+  * Expose `getToken` and `redirect` from `authManager`
+  * Clean up `gulpfile.js`
+
 0.1.6 / 2016-10-13
 ==================
 

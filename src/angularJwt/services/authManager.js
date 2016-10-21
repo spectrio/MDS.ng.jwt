@@ -63,8 +63,8 @@ angular.module('angular-jwt.authManager', [])
         if (routeData && routeData.requiresLogin === true) {
           var token = invokeToken(config.tokenGetter);
           if (!token || jwtHelper.isTokenExpired(token)) {
-            invokeRedirector(config.unauthenticatedRedirector);
             event.preventDefault();
+            invokeRedirector(config.unauthenticatedRedirector);
           }
         }
       }

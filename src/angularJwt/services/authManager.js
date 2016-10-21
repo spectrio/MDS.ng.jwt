@@ -16,10 +16,10 @@ angular.module('angular-jwt.authManager', [])
       }
 
       function invokeRedirector(redirector) {
-        if (Array.isArray(redirector)) {
-          return $injector.invoke(redirector, this, {});
+        if (Array.isArray(redirector) || angular.isFunction(redirector)) {
+          return $injector.invoke(redirector, config, {});
         } else {
-          return redirector($location);
+          throw new Error('unauthenticatedRedirector must be a function');
         }
       }
 

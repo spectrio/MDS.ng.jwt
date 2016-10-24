@@ -7,7 +7,6 @@ This library will help you work with [JWTs](http://jwt.io/).
 * **Decode a JWT** from your AngularJS app
 * Check the **expiration date** of the JWT
 * Automatically **send the JWT in every request** made to the server
-* Use **refresh tokens to always send a not expired JWT** to the server
 * Manage the user's authentication state with **authManager**
 
 ## Installing it

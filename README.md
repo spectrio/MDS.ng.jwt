@@ -107,7 +107,7 @@ angular
     $httpProvider.interceptors.push('jwtInterceptor');
   })
   .controller('Controller', function Controller($http) {
-    // This request will NOT send the token as it has skipAuthentication
+    // This request will NOT send the token as it has skipAuthorization
     $http({
       url: '/hola',
       skipAuthorization: true,

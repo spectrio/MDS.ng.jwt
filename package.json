@@ -11,6 +11,10 @@
   "scripts": {
     "test": "gulp test-src"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auth0/angular-jwt.git"
+  },
   "dependencies": {},
   "devDependencies": {
     "karma-mocha-reporter": "^0.3.1",

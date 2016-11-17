@@ -90,6 +90,28 @@ angular
   });
 ```
 
+### Configuring the Authentication Scheme
+
+By default, angular-jwt uses the `Bearer` scheme when sending JSON Web Tokens as an `Authorization` header. The header that gets attached to `$http` requests looks like this:
+
+```
+Authorization: Bearer eyJ0eXAiOiJKV...
+```
+
+If you would like to provide your own scheme, you can configure it by setting a value for `authPrefix` in the `jwtOptionsProvider` configuration.
+
+```js
+angular
+  .module('app', ['angular-jwt'])
+  .config(function Config($httpProvider, jwtOptionsProvider) {
+    jwtOptionsProvider.config({
+      authPrefix: 'MyPrefix '
+      ...
+    });
+
+    $httpProvider.interceptors.push('jwtInterceptor');
+```
+
 ### Not Sending the JWT for Specific Requests
 
 ```js

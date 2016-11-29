@@ -408,4 +408,4 @@ Auth0 helps you to:
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
+This project is licensed under the MIT license. See the [LICENSE](LICENSE.txt) file for more info.

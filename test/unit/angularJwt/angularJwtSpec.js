@@ -20,8 +20,8 @@ describe('Main Module', function() {
     expect(hasModule('angular-jwt.options')).to.be.ok;
   });
 
-  it('should load authManager module', function() {
-    expect(hasModule('angular-jwt.authManager')).to.be.ok;
+  it('should load jwtAuthManager module', function() {
+    expect(hasModule('angular-jwt.jwtAuthManager')).to.be.ok;
   });
 
   it('should load interceptor module', function() {

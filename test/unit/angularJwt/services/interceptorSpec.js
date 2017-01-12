@@ -3,9 +3,10 @@
 describe('interceptor', function() {
 
   beforeEach(function() {
+
     module('angular-jwt.interceptor');
     module('angular-jwt.options');
-  });
+});
 
   afterEach(inject(function($httpBackend) {
     $httpBackend.verifyNoOutstandingExpectation();
@@ -22,8 +23,8 @@ describe('interceptor', function() {
     });
 
     inject(function ($http, $httpBackend) {
-        $http({url: '/hello'}).success(function (data) {
-          expect(data).to.be.equal('hello');
+		$http({url: '/hello'}).then(function (data) {
+          expect(data.data).to.be.equal('hello');
           done();
         });
 
@@ -76,8 +77,8 @@ describe('interceptor', function() {
     });
 
     inject(function ($http, $httpBackend) {
-        $http({url: '/hello'}).success(function (data) {
-          expect(data).to.be.equal('hello');
+        $http({url: '/hello'}).then(function (data) {
+          expect(data.data).to.be.equal('hello');
           done();
         });
 
@@ -95,8 +96,8 @@ describe('interceptor', function() {
     });
 
     inject(function ($http, $httpBackend) {
-        $http({url: '/hello'}).success(function (data) {
-          expect(data).to.be.equal('hello');
+        $http({url: '/hello'}).then(function (data) {
+          expect(data.data).to.be.equal('hello');
           done();
         });
 
@@ -118,8 +119,8 @@ describe('interceptor', function() {
     });
 
     inject(function ($http, $httpBackend) {
-        $http({url: '/hello'}).success(function (data) {
-          expect(data).to.be.equal('hello');
+        $http({url: '/hello'}).then(function (data) {
+          expect(data.data).to.be.equal('hello');
           done();
         });
 

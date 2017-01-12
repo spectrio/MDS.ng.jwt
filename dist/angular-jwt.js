@@ -11,101 +11,113 @@ angular.module('angular-jwt',
         'angular-jwt.options',
         'angular-jwt.interceptor',
         'angular-jwt.jwt',
-        'angular-jwt.authManager'
+        'angular-jwt.jwtAuthManager'
     ]);
 
-angular.module('angular-jwt.authManager', [])
-  .provider('authManager', function () {
+(function(window, angular, undefined) {
+	'use strict';
 
-    this.$get = ["$rootScope", "$injector", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions) {
 
-      var config = jwtOptions.getConfig();
+	angular.module('angular-jwt.jwtAuthManager', [])
+	.constant('JWT_AUTH_EVENTS', {
+		sessionTimeout: 'jwt.tokenHasExpired',
+		authenticated: 'jwt.authenticated',
+		notAuthenticated: 'jwt.notAuthenticated'
+	})
+	.provider('jwtAuthManager', function () {
+		var _isAuthenticated = false;
 
-      function invokeToken(tokenGetter) {
-        var token = null;
-        if (Array.isArray(tokenGetter)) {
-          token = $injector.invoke(tokenGetter, this, {options: null});
-        } else {
-          token = tokenGetter();
-        }
-        return token;
-      }
+		this.$get = ["$rootScope", "$injector", "$location", "jwtHelper", "jwtInterceptor", "jwtOptions", "JWT_AUTH_EVENTS", function ($rootScope, $injector, $location, jwtHelper, jwtInterceptor, jwtOptions, JWT_AUTH_EVENTS) {
 
-      function invokeRedirector(redirector) {
-        if (Array.isArray(redirector) || angular.isFunction(redirector)) {
-          return $injector.invoke(redirector, config, {});
-        } else {
-          throw new Error('unauthenticatedRedirector must be a function');
-        }
-      }
+			var config = jwtOptions.getConfig();
 
-      function isAuthenticated() {
-        var token = invokeToken(config.tokenGetter);
-        if (token) {
-          return !jwtHelper.isTokenExpired(token);
-        }
-      }
+			function invokeToken(tokenGetter) {
+				var token = null;
+				if (Array.isArray(tokenGetter)) {
+					token = $injector.invoke(tokenGetter, this, {options: null});
+				} else {
+					token = tokenGetter();
+				}
+				return token;
+			}
 
-      $rootScope.isAuthenticated = false;
+			function invokeRedirector( redirector, nextState, params ) {
+				console.log( 'NEXT STATE', nextState, params);
+				if (Array.isArray(redirector) || angular.isFunction(redirector)) {
+					return $injector.invoke(redirector, config, { next: nextState, params: params });
+				} else {
+					throw new Error('unauthenticatedRedirector must be a function');
+				}
+			}
 
-      function authenticate() {
-        $rootScope.isAuthenticated = true;
-      }
+			function isAuthenticated() {
+				var token = invokeToken(config.tokenGetter);
+				if (token) {
+					return !jwtHelper.isTokenExpired(token);
+				}
+				return false;
+			}
 
-      function unauthenticate() {
-        $rootScope.isAuthenticated = false;
-      }
+			function authenticate() {
+				_isAuthenticated = true;
+			}
 
-      function checkAuthOnRefresh() {
-        $rootScope.$on('$locationChangeStart', function () {
-          var token = invokeToken(config.tokenGetter);
-          if (token) {
-            if (!jwtHelper.isTokenExpired(token)) {
-              authenticate();
-            } else {
-              $rootScope.$broadcast('tokenHasExpired', token);
-            }
-          }
-        });
-      }
+			function unauthenticate() {
+				_isAuthenticated = false;
+			}
 
-      function redirectWhenUnauthenticated() {
-        $rootScope.$on('unauthenticated', function () {
-          invokeRedirector(config.unauthenticatedRedirector);
-          unauthenticate();
-        });
-      }
+			function checkAuthOnRefresh() {
+				$rootScope.$on('$locationChangeStart', function () {
+					var token = invokeToken(config.tokenGetter);
+					if (token) {
+						if (!jwtHelper.isTokenExpired(token)) {
+							authenticate();
+							$rootScope.$broadcast( JWT_AUTH_EVENTS.authenticated, token );
+						} else {
+							$rootScope.$broadcast( JWT_AUTH_EVENTS.sessionTimeout, token );
+						}
+					}
+				});
+			}
 
-      function verifyRoute(event, next) {
-        if (!next) {
-          return false;
-        }
+			function redirectWhenUnauthenticated() {
+				$rootScope.$on( JWT_AUTH_EVENTS.notAuthenticated, function () {
+					invokeRedirector(config.unauthenticatedRedirector);
+					unauthenticate();
+				});
+			}
 
-        var routeData = (next.$$route) ? next.$$route : next.data;
+			function verifyRoute(event, next, params) {
+				console.warn( 'Verifying Route', next, params, isAuthenticated() );
+				if (!next) {
+					return false;
+				}
 
-        if (routeData && routeData.requiresLogin === true) {
-          var token = invokeToken(config.tokenGetter);
-          if (!token || jwtHelper.isTokenExpired(token)) {
-            event.preventDefault();
-            invokeRedirector(config.unauthenticatedRedirector);
-          }
-        }
-      }
+				var routeData = (next.$$route) ? next.$$route : next.data;
 
-      var eventName = ($injector.has('$state')) ? '$stateChangeStart' : '$routeChangeStart';
-      $rootScope.$on(eventName, verifyRoute);
+				if (routeData && routeData.requiresLogin === true) {
+					if ( !isAuthenticated() ) {
+						event.preventDefault();
+						invokeRedirector( config.unauthenticatedRedirector, next, params );
+					}
+				}
+			}
 
-      return {
-        authenticate: authenticate,
-        unauthenticate: unauthenticate,
-        getToken: function(){ return invokeToken(config.tokenGetter); },
-        redirect: function() { return invokeRedirector(config.unauthenticatedRedirector); },
-        checkAuthOnRefresh: checkAuthOnRefresh,
-        redirectWhenUnauthenticated: redirectWhenUnauthenticated,
-        isAuthenticated: isAuthenticated
-      }
-    }]
-  });
+			var eventName = ($injector.has('$state')) ? '$stateChangeStart' : '$routeChangeStart';
+			$rootScope.$on(eventName, verifyRoute);
+
+			return {
+				authenticate: authenticate,
+				unauthenticate: unauthenticate,
+				getToken: function(){ return invokeToken(config.tokenGetter); },
+				redirect: function( evt, next, params) { return invokeRedirector(config.unauthenticatedRedirector, next, params); },
+				checkAuthOnRefresh: checkAuthOnRefresh,
+				redirectWhenUnauthenticated: redirectWhenUnauthenticated,
+				isAuthenticated: isAuthenticated
+			};
+		}];
+	});
+})(window, window.angular);
 
 angular.module('angular-jwt.interceptor', [])
   .provider('jwtInterceptor', function() {

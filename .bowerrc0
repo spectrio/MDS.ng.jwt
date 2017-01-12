@@ -1,0 +1,12 @@
+{
+  "directory": "bower_components",
+  "registry": {
+      "search": [
+          "https://bettervideo:md$2016@proget.mdsweb01.bettervideo.com/bower/bower",
+          "https://bower.herokuapp.com"
+      ],
+      "register": "https://bettervideo:md$2016@proget.mdsweb01.bettervideo.com/bower/bower",
+      "publish": "https://bettervideo:md$2016@proget.mdsweb01.bettervideo.com/bower/bower"
+  },
+  "strict-ssl": false
+}
